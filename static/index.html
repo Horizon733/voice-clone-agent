@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" style="color-scheme: light only;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280">
+    <meta name="color-scheme" content="light only">
+    <meta name="supported-color-schemes" content="light">
+    <title>droidcity_ · Voice Studio</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- ================== HEADER ================== -->
+        <header class="hero">
+            <div class="orb"></div>
+            <div class="hero-text">
+                <h1>Voice <em>Studio</em></h1>
+                <div class="hero-sub">DROIDCITY_ · QWEN3-TTS · LOCAL · 1.7B</div>
+            </div>
+            <div class="status-indicator" id="status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text">IDLE</span>
+            </div>
+        </header>
+
+        <!-- ================== TABS ================== -->
+        <nav class="tabs">
+            <button class="tab active" data-tab="clone">Clone</button>
+            <button class="tab" data-tab="library">Library</button>
+            <button class="tab" data-tab="batch">Batch</button>
+            <button class="tab" data-tab="presets">Presets</button>
+            <button class="tab" data-tab="design">Design</button>
+        </nav>
+
+        <!-- ================== PANE: CLONE ================== -->
+        <section class="pane active" data-pane="clone">
+            <div class="model-pill">
+                <span class="pill-dot"></span>
+                <span>MODEL · BASE · VOICE CLONING</span>
+            </div>
+
+            <div class="two-col">
+                <div class="col col-input">
+                    <h2 class="section-title">Compose</h2>
+                    <p class="section-desc">Pick a voice from your library. Type the script. Generate multiple takes.</p>
+
+                    <div class="field">
+                        <label>Voice</label>
+                        <div class="voice-selector" id="clone-voice-selector">
+                            <div class="voice-selector-empty" id="clone-voice-hint">
+                                No voices saved yet. <a data-go-tab="library">Add one in the Library tab</a> to start cloning.
+                            </div>
+                        </div>
+                        <input type="hidden" id="clone-voice" value="">
+                    </div>
+
+                    <div class="field">
+                        <label>Script</label>
+                        <textarea id="clone-script" rows="7" placeholder="Type the script you want spoken in your cloned voice…"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label>Language</label>
+                        <select id="clone-language"></select>
+                    </div>
+
+                    <details class="accordion">
+                        <summary>Advanced parameters</summary>
+                        <div class="accordion-body">
+                            <div class="slider-row">
+                                <label>Temperature</label>
+                                <input type="range" id="clone-temp" min="0.1" max="1.5" step="0.05" value="0.6">
+                                <span class="slider-val" id="clone-temp-val">0.6</span>
+                            </div>
+                            <div class="slider-row">
+                                <label>Top-p</label>
+                                <input type="range" id="clone-top-p" min="0.1" max="1.0" step="0.05" value="0.95">
+                                <span class="slider-val" id="clone-top-p-val">0.95</span>
+                            </div>
+                            <div class="slider-row">
+                                <label>Top-k</label>
+                                <input type="range" id="clone-top-k" min="1" max="100" step="1" value="50">
+                                <span class="slider-val" id="clone-top-k-val">50</span>
+                            </div>
+                            <div class="slider-row">
+                                <label>Takes</label>
+                                <input type="range" id="clone-takes" min="1" max="5" step="1" value="3">
+                                <span class="slider-val" id="clone-takes-val">3</span>
+                            </div>
+                        </div>
+                    </details>
+
+                    <button class="btn btn-primary btn-lg" id="clone-generate">
+                        <span class="btn-label">Generate</span>
+                    </button>
+                </div>
+
+                <div class="col col-output">
+                    <h2 class="section-title">Output</h2>
+                    <div class="output-empty" id="clone-empty">
+                        <div class="empty-icon">♪</div>
+                        <div class="empty-text">Generated takes will appear here</div>
+                    </div>
+                    <div id="clone-output" class="output-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== PANE: LIBRARY ================== -->
+        <section class="pane" data-pane="library">
+            <div class="two-col">
+                <div class="col">
+                    <h2 class="section-title">Add voice</h2>
+                    <p class="section-desc">30–60 seconds of clean audio. Word-for-word transcript.</p>
+
+                    <div class="field">
+                        <label>Name</label>
+                        <input type="text" id="lib-name" placeholder="dishant-main">
+                    </div>
+
+                    <div class="field">
+                        <label>Reference audio (WAV, MP3, M4A)</label>
+                        <input type="file" id="lib-audio" accept="audio/*">
+                    </div>
+
+                    <div class="field">
+                        <label>Exact transcript</label>
+                        <textarea id="lib-transcript" rows="4" placeholder="Upload audio first — AI will transcribe it automatically" disabled></textarea>
+                        <div class="field-hint">AI will auto-transcribe when you upload audio. Review and edit before saving.</div>
+                    </div>
+
+                    <button class="btn btn-primary" id="lib-save" disabled>Save voice</button>
+                </div>
+
+                <div class="col">
+                    <h2 class="section-title">Library</h2>
+                    <p class="section-desc">Your saved reference voices.</p>
+
+                    <div id="lib-list" class="voice-list">
+                        <div class="empty-text" style="padding: 24px 0;">No voices yet</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== PANE: BATCH ================== -->
+        <section class="pane" data-pane="batch">
+            <div class="model-pill">
+                <span class="pill-dot"></span>
+                <span>MODEL · BASE · VOICE CLONING</span>
+            </div>
+
+            <div class="two-col">
+                <div class="col col-input">
+                    <h2 class="section-title">Batch generate</h2>
+                    <p class="section-desc">One script per line. Ship a week of reels in one session.</p>
+
+                    <div class="field">
+                        <label>Voice</label>
+                        <div class="voice-selector" id="batch-voice-selector">
+                            <div class="voice-selector-empty" id="batch-voice-hint">
+                                No voices saved yet. <a data-go-tab="library">Add one in the Library tab</a> first.
+                            </div>
+                        </div>
+                        <input type="hidden" id="batch-voice" value="">
+                    </div>
+
+                    <div class="field">
+                        <label>Scripts (one per line)</label>
+                        <textarea id="batch-scripts" rows="12" placeholder="Most Indian AI engineers build tools the world pays for.
+I cloned myself for zero rupees on a laptop GPU.
+This isn't me — it's an AI clone running fully offline.
+Follow droidcity. I'll show you how."></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label>Language</label>
+                        <select id="batch-language"></select>
+                    </div>
+
+                    <details class="accordion">
+                        <summary>Advanced parameters</summary>
+                        <div class="accordion-body">
+                            <div class="slider-row">
+                                <label>Temperature</label>
+                                <input type="range" id="batch-temp" min="0.1" max="1.5" step="0.05" value="0.6">
+                                <span class="slider-val" id="batch-temp-val">0.6</span>
+                            </div>
+                            <div class="slider-row">
+                                <label>Top-p</label>
+                                <input type="range" id="batch-top-p" min="0.1" max="1.0" step="0.05" value="0.95">
+                                <span class="slider-val" id="batch-top-p-val">0.95</span>
+                            </div>
+                            <div class="slider-row">
+                                <label>Top-k</label>
+                                <input type="range" id="batch-top-k" min="1" max="100" step="1" value="50">
+                                <span class="slider-val" id="batch-top-k-val">50</span>
+                            </div>
+                        </div>
+                    </details>
+
+                    <button class="btn btn-primary btn-lg" id="batch-generate">
+                        <span class="btn-label">Generate batch</span>
+                    </button>
+                </div>
+
+                <div class="col col-output">
+                    <h2 class="section-title">Clips</h2>
+                    <div class="output-empty" id="batch-empty">
+                        <div class="empty-icon">♪</div>
+                        <div class="empty-text">Generated clips will appear here</div>
+                    </div>
+                    <div id="batch-output" class="output-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== PANE: PRESETS ================== -->
+        <section class="pane" data-pane="presets">
+            <div class="model-pill">
+                <span class="pill-dot"></span>
+                <span>MODEL · CUSTOMVOICE · PRESET SPEAKERS</span>
+            </div>
+
+            <div class="two-col">
+                <div class="col col-input">
+                    <h2 class="section-title">Preset voices</h2>
+                    <p class="section-desc">Nine built-in Qwen3-TTS speakers. First generation loads CustomVoice model (~30s).</p>
+
+                    <div class="field">
+                        <label>Speaker</label>
+                        <select id="preset-speaker"></select>
+                    </div>
+
+                    <div class="field">
+                        <label>Script</label>
+                        <textarea id="preset-script" rows="6" placeholder="What should the preset voice say?"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label>Style (optional)</label>
+                        <input type="text" id="preset-instruction" placeholder='e.g. "speak with high energy and excitement"'>
+                    </div>
+
+                    <div class="field">
+                        <label>Language</label>
+                        <select id="preset-language"></select>
+                    </div>
+
+                    <details class="accordion">
+                        <summary>Advanced parameters</summary>
+                        <div class="accordion-body">
+                            <div class="slider-row">
+                                <label>Temperature</label>
+                                <input type="range" id="preset-temp" min="0.1" max="1.5" step="0.05" value="0.7">
+                                <span class="slider-val" id="preset-temp-val">0.7</span>
+                            </div>
+                            <div class="slider-row">
+                                <label>Top-p</label>
+                                <input type="range" id="preset-top-p" min="0.1" max="1.0" step="0.05" value="0.95">
+                                <span class="slider-val" id="preset-top-p-val">0.95</span>
+                            </div>
+                            <div class="slider-row">
+                                <label>Top-k</label>
+                                <input type="range" id="preset-top-k" min="1" max="100" step="1" value="50">
+                                <span class="slider-val" id="preset-top-k-val">50</span>
+                            </div>
+                        </div>
+                    </details>
+
+                    <button class="btn btn-primary btn-lg" id="preset-generate">
+                        <span class="btn-label">Generate</span>
+                    </button>
+                </div>
+
+                <div class="col col-output">
+                    <h2 class="section-title">Output</h2>
+                    <div class="output-empty" id="preset-empty">
+                        <div class="empty-icon">♪</div>
+                        <div class="empty-text">Generated audio will appear here</div>
+                    </div>
+                    <div id="preset-output" class="output-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== PANE: DESIGN ================== -->
+        <section class="pane" data-pane="design">
+            <div class="model-pill">
+                <span class="pill-dot"></span>
+                <span>MODEL · VOICEDESIGN · NOVEL VOICES</span>
+            </div>
+
+            <div class="two-col">
+                <div class="col col-input">
+                    <h2 class="section-title">Design a voice</h2>
+                    <p class="section-desc">Describe the voice you want in plain English. The model creates a brand-new voice matching your description.</p>
+
+                    <div class="field">
+                        <label>Voice description</label>
+                        <textarea id="design-instruction" rows="3" placeholder='e.g. "A deep, authoritative male voice with a slight British accent, calm and measured"'></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label>Script</label>
+                        <textarea id="design-script" rows="6" placeholder="What should this designed voice say?"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label>Language</label>
+                        <select id="design-language"></select>
+                    </div>
+
+                    <details class="accordion">
+                        <summary>Advanced parameters</summary>
+                        <div class="accordion-body">
+                            <div class="slider-row">
+                                <label>Temperature</label>
+                                <input type="range" id="design-temp" min="0.1" max="1.5" step="0.05" value="0.8">
+                                <span class="slider-val" id="design-temp-val">0.8</span>
+                            </div>
+                            <div class="slider-row">
+                                <label>Top-p</label>
+                                <input type="range" id="design-top-p" min="0.1" max="1.0" step="0.05" value="0.95">
+                                <span class="slider-val" id="design-top-p-val">0.95</span>
+                            </div>
+                            <div class="slider-row">
+                                <label>Top-k</label>
+                                <input type="range" id="design-top-k" min="1" max="100" step="1" value="50">
+                                <span class="slider-val" id="design-top-k-val">50</span>
+                            </div>
+                        </div>
+                    </details>
+
+                    <button class="btn btn-primary btn-lg" id="design-generate">
+                        <span class="btn-label">Design voice</span>
+                    </button>
+                </div>
+
+                <div class="col col-output">
+                    <h2 class="section-title">Output</h2>
+                    <div class="output-empty" id="design-empty">
+                        <div class="empty-icon">♪</div>
+                        <div class="empty-text">Designed voice will appear here</div>
+                    </div>
+                    <div id="design-output" class="output-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== FOOTER ================== -->
+        <footer class="footer">
+            <div>BUILT BY @DROIDCITY_</div>
+            <div class="footer-right">
+                <span class="footer-dot"></span>
+                <span>LOCAL · OFFLINE · APACHE 2.0</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
