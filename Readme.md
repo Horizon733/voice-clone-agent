@@ -2,6 +2,9 @@
 
 Local Qwen3-TTS voice cloning UI. FastAPI backend + pure HTML/CSS/JS frontend. AI-powered transcription with WhisperX.
 
+## Architecture diagram
+<img src="./architecture.png" alt="Architecture Diagram" width="600">
+
 ## Setup
 
 ```powershell
